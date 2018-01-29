@@ -1,6 +1,33 @@
 # Changelog
 
-## master
+## [3.0.3] – 2017-12-07
+
+- [#306]: fixed method `applySkipping` to avoid OutOfBoundsException
+
+[#306]: https://github.com/craue/CraueFormFlowBundle/issues/306
+[3.0.3]: https://github.com/craue/CraueFormFlowBundle/compare/3.0.2...3.0.3
+
+## [2.1.10] – 2017-12-07
+
+- [#306]: fixed method `applySkipping` to avoid OutOfBoundsException
+
+[#306]: https://github.com/craue/CraueFormFlowBundle/issues/306
+[2.1.10]: https://github.com/craue/CraueFormFlowBundle/compare/2.1.9...2.1.10
+
+## [3.0.2] – 2017-12-01
+
+- added support for Symfony 4.*
+
+[3.0.2]: https://github.com/craue/CraueFormFlowBundle/compare/3.0.1...3.0.2
+
+## [3.0.1] – 2017-11-08
+
+- [#301]: allow setting a `GroupSequence` for the `validation_groups` option
+
+[#301]: https://github.com/craue/CraueFormFlowBundle/issues/301
+[3.0.1]: https://github.com/craue/CraueFormFlowBundle/compare/3.0.0...3.0.1
+
+## [3.0.0] – 2017-09-04
 
 - BC breaks (follow `UPGRADE-3.0.md` to upgrade):
   - [#101]: support for concurrent instances of the same flow
@@ -32,6 +59,7 @@
 - [#254]: added Slovak translation
 - [#262]: added getters for steps remaining and done
 - [#280]: added an option for removing the reset button
+- [#293]: added Hungarian translation
 
 [#98]: https://github.com/craue/CraueFormFlowBundle/issues/98
 [#101]: https://github.com/craue/CraueFormFlowBundle/issues/101
@@ -64,6 +92,8 @@
 [#254]: https://github.com/craue/CraueFormFlowBundle/issues/254
 [#262]: https://github.com/craue/CraueFormFlowBundle/issues/262
 [#280]: https://github.com/craue/CraueFormFlowBundle/issues/280
+[#293]: https://github.com/craue/CraueFormFlowBundle/issues/293
+[3.0.0]: https://github.com/craue/CraueFormFlowBundle/compare/2.1.9...3.0.0
 
 ## [2.1.9] – 2015-12-29
 

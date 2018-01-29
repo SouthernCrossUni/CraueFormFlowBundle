@@ -3,12 +3,13 @@
 namespace Craue\FormFlowBundle\Tests;
 
 use Craue\FormFlowBundle\Tests\IntegrationTestCase;
+use Craue\FormFlowBundle\Util\TempFileUtil;
 
 /**
  * @group integration
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2017 Christian Raue
+ * @copyright 2011-2018 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class PhotoUploadFlowTest extends IntegrationTestCase {
@@ -23,9 +24,15 @@ class PhotoUploadFlowTest extends IntegrationTestCase {
 		$this->assertCurrentStepNumber(1, $crawler);
 		$this->assertCurrentFormData('{"photo":null,"comment":null}', $crawler);
 
-		// upload the photo -> step 2
+		// upload the photo
 		$form = $crawler->selectButton('next')->form();
 		$form['photoUpload[photo]']->upload($image);
+
+		// allow the temporary file created by the DomCrawler to be removed after the test
+		$fileFieldValue = $form['photoUpload[photo]']->getValue();
+		TempFileUtil::addTempFile($fileFieldValue['tmp_name']);
+
+		// submit the form -> step 2
 		$crawler = $this->client->submit($form);
 		$this->assertCurrentStepNumber(2, $crawler);
 		$this->assertCurrentFormData('{"photo":{},"comment":null}', $crawler);

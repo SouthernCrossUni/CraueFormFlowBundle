@@ -2,7 +2,7 @@
 <!--
 	Author: Christian Raue <christian.raue@gmail.com>
 	Author: Marcus Stöhr <dafish@soundtrack-board.de>
-	Copyright: 2011-2017 Christian Raue
+	Copyright: 2011-2018 Christian Raue
 	License: http://opensource.org/licenses/mit-license.php MIT License
 -->
 <container
@@ -23,7 +23,7 @@
 			<argument type="service" id="session" />
 		</service>
 
-		<service id="craue.form.flow.storage" alias="craue.form.flow.storage_default" />
+		<service id="craue.form.flow.storage" alias="craue.form.flow.storage_default" public="true" />
 
 		<service id="craue.form.flow.data_manager_default" class="Craue\FormFlowBundle\Storage\DataManager" public="false">
 			<argument type="service" id="craue.form.flow.storage" />

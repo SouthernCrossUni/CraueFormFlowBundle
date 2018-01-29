@@ -12,13 +12,14 @@ use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Validator\Constraints\GroupSequence;
 
 /**
  * @group unit
  *
  * @author Toni Uebernickel <tuebernickel@gmail.com>
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2017 Christian Raue
+ * @copyright 2011-2018 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class FormFlowTest extends UnitTestCase {
@@ -87,9 +88,11 @@ class FormFlowTest extends UnitTestCase {
 	}
 
 	/**
-	 * Ensure that the "validation_groups" option can be set to false to disable validation.
+	 * Ensure that the "validation_groups" option can be set to specific valid values.
+	 *
+	 * @dataProvider dataGetFormOptions_setValidationGroups
 	 */
-	public function testGetFormOptions_setValidationGroupsToFalse() {
+	public function testGetFormOptions_setValidationGroups($validationGroups) {
 		$flow = $this->getFlowWithMockedMethods(array('loadStepsConfig'));
 
 		$flow
@@ -101,33 +104,20 @@ class FormFlowTest extends UnitTestCase {
 		;
 
 		$options = $flow->getFormOptions(1, array(
-			'validation_groups' => false,
+			'validation_groups' => $validationGroups,
 		));
 
-		$this->assertFalse($options['validation_groups']);
+		$this->assertSame($validationGroups, $options['validation_groups']);
 	}
 
-	/**
-	 * Ensure that the "validation_groups" option can be set to a closure.
-	 */
-	public function testGetFormOptions_setValidationGroupsToClosure() {
-		$flow = $this->getFlowWithMockedMethods(array('loadStepsConfig'));
-
-		$flow
-			->expects($this->once())
-			->method('loadStepsConfig')
-			->will($this->returnValue(array(
-				array(),
-			)))
-		;
-
-		$options = $flow->getFormOptions(1, array(
-			'validation_groups' => function(FormInterface $form) {
+	public function dataGetFormOptions_setValidationGroups() {
+		return array(
+			array(false),
+			array(function(FormInterface $form) {
 				return array('custom_group');
-			},
-		));
-
-		$this->assertTrue(is_callable($options['validation_groups']));
+			}),
+			array(new GroupSequence(array('first', 'second'))),
+		);
 	}
 
 	/**
@@ -559,6 +549,42 @@ class FormFlowTest extends UnitTestCase {
 	 */
 	public function testGetCurrentStepNumber_notAvailable() {
 		$this->getMockedFlow()->getCurrentStepNumber();
+	}
+
+	/**
+	 * @dataProvider dataApplySkipping
+	 */
+	public function testApplySkipping($stepCount, array $stepsSkipped, $stepNumber, $direction, $expectedTargetStep) {
+		$flow = $this->getFlowWithMockedMethods(array('loadStepsConfig'));
+
+		$stepsConfig = array();
+
+		for ($stepNumber = 1; $stepNumber <= $stepCount; ++$stepNumber) {
+			$stepsConfig[] = array(
+				'skip' => in_array($stepNumber, $stepsSkipped, true),
+			);
+		}
+
+		$flow
+			->expects($this->once())
+			->method('loadStepsConfig')
+			->will($this->returnValue($stepsConfig))
+		;
+
+		$method = new \ReflectionMethod($flow, 'applySkipping');
+		$method->setAccessible(true);
+
+		$this->assertSame($expectedTargetStep, $method->invoke($flow, $stepNumber, $direction));
+	}
+
+	public function dataApplySkipping() {
+		return array(
+			array(2, array(2), 2, 1, 1),
+			array(2, array(1), 2, -1, 2),
+
+			array(2, array(1), 2, 1, 2),
+			array(2, array(2), 2, -1, 1),
+		);
 	}
 
 	/**

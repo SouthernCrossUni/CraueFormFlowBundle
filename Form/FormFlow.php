@@ -18,12 +18,13 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Validator\Constraints\GroupSequence;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
  * @author Marcus Stöhr <dafish@soundtrack-board.de>
  * @author Toni Uebernickel <tuebernickel@gmail.com>
- * @copyright 2011-2017 Christian Raue
+ * @copyright 2011-2018 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 abstract class FormFlow implements FormFlowInterface {
@@ -430,12 +431,22 @@ abstract class FormFlow implements FormFlowInterface {
 	 */
 	protected function applySkipping($stepNumber, $direction = 1) {
 		if ($direction !== 1 && $direction !== -1) {
-			throw new \InvalidArgumentException(sprintf('Argument of either -1 or 1 expected, "%s" given.',
-					$direction));
+			throw new \InvalidArgumentException(sprintf('Argument of either -1 or 1 expected, "%s" given.', $direction));
 		}
 
-		while ($this->isStepSkipped($stepNumber)) {
+		$stepNumber = $this->ensureStepNumberRange($stepNumber);
+
+		if ($this->isStepSkipped($stepNumber)) {
 			$stepNumber += $direction;
+
+			// change direction if outer bounds are reached
+			if ($direction === 1 && $stepNumber > $this->getStepCount()) {
+				$direction = -1;
+			} elseif ($direction === -1 && $stepNumber < 1) {
+				$direction = 1;
+			}
+
+			return $this->applySkipping($stepNumber, $direction);
 		}
 
 		return $stepNumber;
@@ -543,9 +554,7 @@ abstract class FormFlow implements FormFlowInterface {
 			--$requestedStepNumber;
 		}
 
-		// ensure that the step number is within the range of defined steps to avoid a possible OutOfBoundsException
-		$requestedStepNumber = max(min($requestedStepNumber, $this->getStepCount()), 1);
-
+		$requestedStepNumber = $this->ensureStepNumberRange($requestedStepNumber);
 		$requestedStepNumber = $this->refineCurrentStepNumber($requestedStepNumber);
 
 		if ($this->getRequestedTransition() === self::TRANSITION_BACK) {
@@ -560,6 +569,15 @@ abstract class FormFlow implements FormFlowInterface {
 		}
 
 		return $requestedStepNumber;
+	}
+
+	/**
+	 * Ensures that the step number is within the range of defined steps to avoid a possible OutOfBoundsException.
+	 * @param int $stepNumber
+	 * @return int
+	 */
+	private function ensureStepNumberRange($stepNumber) {
+		return max(min($stepNumber, $this->getStepCount()), 1);
 	}
 
 	/**
@@ -766,13 +784,13 @@ abstract class FormFlow implements FormFlowInterface {
 			$options
 		);
 
-		// add the generated step-based validation group, unless it's explicitly set to false or a closure
+		// add the generated step-based validation group, unless it's explicitly set to false, a closure, or a GroupSequence
 		if (!array_key_exists('validation_groups', $options)) {
 			$options['validation_groups'] = array($this->getValidationGroupPrefix() . $step);
 		} else {
 			$vg = $options['validation_groups'];
 
-			if ($vg !== false && !(is_object($vg) && is_a($vg, 'Closure'))) {
+			if ($vg !== false && !is_a($vg, 'Closure') && !$vg instanceof GroupSequence) {
 				$options['validation_groups'] = array_merge(
 					array($this->getValidationGroupPrefix() . $step),
 					(array) $vg
@@ -1042,37 +1060,37 @@ abstract class FormFlow implements FormFlowInterface {
 	// methods for BC with third-party templates (e.g. MopaBootstrapBundle)
 
 	public function getCurrentStep() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getCurrentStepNumber instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getCurrentStepNumber instead.', E_USER_DEPRECATED);
 		return $this->getCurrentStepNumber();
 	}
 
 	public function getCurrentStepDescription() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getCurrentStepLabel instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getCurrentStepLabel instead.', E_USER_DEPRECATED);
 		return $this->getCurrentStepLabel();
 	}
 
 	public function getMaxSteps() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getStepCount instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getStepCount instead.', E_USER_DEPRECATED);
 		return $this->getStepCount();
 	}
 
 	public function getStepDescriptions() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getStepLabels instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getStepLabels instead.', E_USER_DEPRECATED);
 		return $this->getStepLabels();
 	}
 
 	public function getFirstStep() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getFirstStepNumber instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getFirstStepNumber instead.', E_USER_DEPRECATED);
 		return $this->getFirstStepNumber();
 	}
 
 	public function getLastStep() {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method getLastStepNumber instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method getLastStepNumber instead.', E_USER_DEPRECATED);
 		return $this->getLastStepNumber();
 	}
 
 	public function hasSkipStep($stepNumber) {
-		@trigger_error('Method ' . __METHOD__ . ' is deprecated since version 2.0. Use method isStepSkipped instead.', E_USER_DEPRECATED);
+		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method isStepSkipped instead.', E_USER_DEPRECATED);
 		return $this->isStepSkipped($stepNumber);
 	}
 

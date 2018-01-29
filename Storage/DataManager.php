@@ -19,7 +19,7 @@ use Craue\FormFlowBundle\Form\FormFlowInterface;
  * </code>
  *
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2017 Christian Raue
+ * @copyright 2011-2018 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class DataManager implements ExtendedDataManagerInterface {
@@ -118,9 +118,7 @@ class DataManager implements ExtendedDataManagerInterface {
 		$savedFlows = $this->storage->get(DataManagerInterface::STORAGE_ROOT, array());
 
 		// remove data for only this flow instance
-		if (isset($savedFlows[$flow->getName()][$flow->getInstanceId()])) {
-			unset($savedFlows[$flow->getName()][$flow->getInstanceId()]);
-		}
+		unset($savedFlows[$flow->getName()][$flow->getInstanceId()]);
 
 		$this->storage->set(DataManagerInterface::STORAGE_ROOT, $savedFlows);
 	}

@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @author Christian Raue <christian.raue@gmail.com>
- * @copyright 2011-2017 Christian Raue
+ * @copyright 2011-2018 Christian Raue
  * @license http://opensource.org/licenses/mit-license.php MIT License
  */
 class FormFlowController extends Controller {
@@ -72,6 +72,13 @@ class FormFlowController extends Controller {
 	 */
 	public function issue149Action() {
 		return $this->processFlow(new Issue149Data(), $this->get('integrationTestBundle.form.flow.issue149'));
+	}
+
+	/**
+	 * @Route("/issue303/", name="_FormFlow_issue303")
+	 */
+	public function issue303Action() {
+		return $this->processFlow(new \stdClass(), $this->get('integrationTestBundle.form.flow.issue303'));
 	}
 
 	/**
