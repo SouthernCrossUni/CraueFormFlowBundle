@@ -1093,5 +1093,14 @@ abstract class FormFlow implements FormFlowInterface {
 		@trigger_error('Method ' . __METHOD__ . ' is deprecated since CraueFormFlowBundle 2.0. Use method isStepSkipped instead.', E_USER_DEPRECATED);
 		return $this->isStepSkipped($stepNumber);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * SCU customisation, gets the step forms from a flow for iteration in confirmation page
+	 */
+	
+	public function getStepForms() {
+	    return $this->stepForms;
+    	}
 
 }
