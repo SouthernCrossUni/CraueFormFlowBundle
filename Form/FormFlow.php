@@ -336,6 +336,12 @@ abstract class FormFlow implements FormFlowInterface {
 
 		return $this->currentStepNumber;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
+	public function setCurrentStepNumber($step) {
+		$this->currentStepNumber = $step;
+        }
 
 	public function setRevalidatePreviousSteps($revalidatePreviousSteps) {
 		$this->revalidatePreviousSteps = (bool) $revalidatePreviousSteps;
@@ -695,11 +701,10 @@ abstract class FormFlow implements FormFlowInterface {
 			$this->invalidateStepData($this->currentStepNumber + 1);
 		}
 	}
-
 	/**
 	 * {@inheritDoc}
 	 */
-	public function saveCurrentStepData(FormInterface $form) {
+	public function getCurrentStepData(FormInterface $form) {
 		$stepData = $this->retrieveStepData();
 
 		$request = $this->getRequest();
@@ -708,12 +713,18 @@ abstract class FormFlow implements FormFlowInterface {
 		$currentStepData = $request->request->get($formName, array());
 
 		if ($this->handleFileUploads) {
-			$currentStepData = array_merge_recursive($currentStepData, $request->files->get($formName, array()));
+		    $currentStepData = array_merge_recursive($currentStepData, $request->files->get($formName, array()));
 		}
 
 		$stepData[$this->currentStepNumber] = $currentStepData;
-
-		$this->saveStepData($stepData);
+		return $stepData;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public function saveCurrentStepData(FormInterface $form) {
+		$this->saveStepData($this->getCurrentStepData($form));
 	}
 
 	/**
